@@ -1,0 +1,74 @@
+/* Page container */
+.admin-container {
+  padding: 30px;
+  background: #f4f6f9;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* Page title */
+.admin-container h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Card layout */
+.card {
+  background: #ffffff;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Card title */
+.card h2 {
+  margin-bottom: 15px;
+  color: #444;
+}
+
+/* Table styling */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  background-color: #0080ff;
+
+}
+
+.table th,
+.table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Approve button */
+button {
+  padding: 6px 12px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #43a047;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+}

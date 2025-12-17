@@ -1,0 +1,48 @@
+.register-page {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.register-box {
+  background: #fff;
+  width: 380px;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+.register-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.register-box label {
+  display: block;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.register-box input,
+.register-box select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #2563eb;
+}
