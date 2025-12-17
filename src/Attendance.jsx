@@ -2,106 +2,109 @@ import React, { useState, useEffect } from "react";
 import "./Attendance.css";
 
 export default function Attendance() {
+  const loggedEmployee = JSON.parse(
+    localStorage.getItem("loggedEmployee")
+  );
+
+  const employeeName = loggedEmployee?.name;
+
   const [records, setRecords] = useState([]);
   const [startTime, setStartTime] = useState(null);
 
   const [leaves, setLeaves] = useState([]);
-  const [leaveReason, setLeaveReason] = useState("");
   const [leaveDate, setLeaveDate] = useState("");
+  const [leaveReason, setLeaveReason] = useState("");
 
-  // 🔥 NEW: prevent overwrite on first load
-  const [dataLoaded, setDataLoaded] = useState(false);
-
-  // ✅ Logged employee
-  const loggedEmployee = JSON.parse(
-    localStorage.getItem("loggedEmployee")
-  );
-  const employeeName = loggedEmployee?.name;
-
-  // ================= LOAD DATA =================
+  /* =======================
+     LOAD DATA
+     ======================= */
   useEffect(() => {
-    const savedAttendance = localStorage.getItem("attendance_records");
-    const savedLeaves = localStorage.getItem("leave_records");
+    if (!employeeName) return;
 
-    if (savedAttendance) {
-      const parsed = JSON.parse(savedAttendance);
-      setRecords(parsed);
+    const allAttendance =
+      JSON.parse(localStorage.getItem("all_attendance")) || {};
 
-      // restore active check-in
-      if (parsed.length > 0 && parsed[0].checkOut === "--") {
+    if (allAttendance[employeeName]) {
+      setRecords(allAttendance[employeeName]);
+
+      if (allAttendance[employeeName][0]?.checkOut === "--") {
         setStartTime(new Date());
       }
     }
 
-    if (savedLeaves) setLeaves(JSON.parse(savedLeaves));
+    const savedLeaves =
+      JSON.parse(localStorage.getItem("leave_records")) || [];
+    setLeaves(savedLeaves);
+  }, [employeeName]);
 
-    setDataLoaded(true); // 🔥 mark load complete
-  }, []);
-
-  // ================= SAVE ATTENDANCE =================
-  useEffect(() => {
-    if (!dataLoaded) return; // 🔥 STOP first empty overwrite
-    localStorage.setItem("attendance_records", JSON.stringify(records));
-  }, [records, dataLoaded]);
-
-  // ================= SYNC LEAVES =================
-  useEffect(() => {
-    const syncLeaves = () => {
-      const updatedLeaves = localStorage.getItem("leave_records");
-      if (updatedLeaves) {
-        setLeaves(JSON.parse(updatedLeaves));
-      }
-    };
-
-    window.addEventListener("storage", syncLeaves);
-    window.addEventListener("focus", syncLeaves);
-
-    return () => {
-      window.removeEventListener("storage", syncLeaves);
-      window.removeEventListener("focus", syncLeaves);
-    };
-  }, []);
-
-  // ================= CHECK IN =================
+  /* =======================
+     CHECK IN
+     ======================= */
   const handleCheckIn = () => {
     if (startTime) return;
 
     const now = new Date();
     setStartTime(now);
 
-    const newRecord = {
+    const allAttendance =
+      JSON.parse(localStorage.getItem("all_attendance")) || {};
+
+    if (!allAttendance[employeeName]) {
+      allAttendance[employeeName] = [];
+    }
+
+    allAttendance[employeeName].unshift({
       date: now.toLocaleDateString(),
-      name:employeeName,
+      name: employeeName,
       checkIn: now.toLocaleTimeString(),
       checkOut: "--",
       hours: "--",
-    };
+    });
 
-    setRecords([newRecord, ...records]);
+    localStorage.setItem(
+      "all_attendance",
+      JSON.stringify(allAttendance)
+    );
+
+    setRecords(allAttendance[employeeName]);
   };
 
-  // ================= CHECK OUT =================
+  /* =======================
+     CHECK OUT
+     ======================= */
   const handleCheckOut = () => {
     if (!startTime) return;
 
     const endTime = new Date();
-    const hours = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(2);
+    const hours = (
+      (endTime - startTime) /
+      (1000 * 60 * 60)
+    ).toFixed(2);
 
-    const updatedRecords = [...records];
-    updatedRecords[0] = {
-      ...updatedRecords[0],
+    const allAttendance =
+      JSON.parse(localStorage.getItem("all_attendance")) || {};
+
+    allAttendance[employeeName][0] = {
+      ...allAttendance[employeeName][0],
       checkOut: endTime.toLocaleTimeString(),
       hours,
     };
 
-    setRecords(updatedRecords);
+    localStorage.setItem(
+      "all_attendance",
+      JSON.stringify(allAttendance)
+    );
+
+    setRecords(allAttendance[employeeName]);
     setStartTime(null);
   };
 
-  // ================= APPLY LEAVE =================
+  /* =======================
+     APPLY LEAVE
+     ======================= */
   const handleLeaveSubmit = () => {
     if (!leaveDate || !leaveReason) {
-      alert("Please enter date and reason for leave.");
+      alert("Please enter leave date and reason");
       return;
     }
 
@@ -113,31 +116,33 @@ export default function Attendance() {
     };
 
     const updatedLeaves = [newLeave, ...leaves];
+
     setLeaves(updatedLeaves);
-    localStorage.setItem("leave_records", JSON.stringify(updatedLeaves));
+    localStorage.setItem(
+      "leave_records",
+      JSON.stringify(updatedLeaves)
+    );
 
     setLeaveDate("");
     setLeaveReason("");
   };
 
-  // show only this employee leaves
   const myLeaves = leaves.filter(
-    (leave) => leave.name === employeeName
+    (l) => l.name === employeeName
   );
 
   const isCheckedIn =
     records.length > 0 && records[0].checkOut === "--";
 
+  /* =======================
+     UI
+     ======================= */
   return (
     <div className="attendance-container">
-      <h1 className="attendance-title">
-        Attendance & Leave Management
-      </h1>
+      <h1>Welcome, {employeeName} 👋</h1>
 
-      {/* Attendance Buttons */}
+      {/* Attendance */}
       <div className="card">
-        <h2>Mark Attendance</h2>
-
         <button
           className="btn btn-checkin"
           onClick={handleCheckIn}
@@ -156,7 +161,7 @@ export default function Attendance() {
         </button>
       </div>
 
-      {/* Attendance Records */}
+      {/* Records */}
       <div className="card">
         <h2>Attendance Records</h2>
         <table className="table">
@@ -165,19 +170,17 @@ export default function Attendance() {
               <th>Date</th>
               <th>Check In</th>
               <th>Check Out</th>
-              <th>Hours Worked</th>
+              <th>Hours</th>
             </tr>
           </thead>
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td colSpan="4" style={{ textAlign: "center" }}>
-                  No records yet.
-                </td>
+                <td colSpan="4">No records</td>
               </tr>
             ) : (
-              records.map((r, index) => (
-                <tr key={index}>
+              records.map((r, i) => (
+                <tr key={i}>
                   <td>{r.date}</td>
                   <td>{r.checkIn}</td>
                   <td>{r.checkOut}</td>
@@ -191,35 +194,29 @@ export default function Attendance() {
 
       {/* Apply Leave */}
       <div className="card">
-        <h2>Apply for Leave</h2>
-
+        <h2>Apply Leave</h2>
         <input
           type="date"
-          className="input"
           value={leaveDate}
           onChange={(e) => setLeaveDate(e.target.value)}
         />
-
         <input
           type="text"
-          className="input"
-          placeholder="Reason for leave"
+          placeholder="Leave reason"
           value={leaveReason}
           onChange={(e) => setLeaveReason(e.target.value)}
         />
-
-        <button className="btn btn-checkin" onClick={handleLeaveSubmit}>
-          Apply Leave
+        <button className="btn" onClick={handleLeaveSubmit}>
+          Apply
         </button>
       </div>
 
       {/* Leave Records */}
       <div className="card">
-        <h2>Leave Records</h2>
+        <h2>My Leave Records</h2>
         <table className="table">
           <thead>
             <tr>
-              <th>Name</th>
               <th>Date</th>
               <th>Reason</th>
               <th>Status</th>
@@ -228,14 +225,11 @@ export default function Attendance() {
           <tbody>
             {myLeaves.length === 0 ? (
               <tr>
-                <td colSpan="4" style={{ textAlign: "center" }}>
-                  No leave applications yet.
-                </td>
+                <td colSpan="3">No leaves</td>
               </tr>
             ) : (
-              myLeaves.map((l, index) => (
-                <tr key={index}>
-                  <td>{l.name}</td>
+              myLeaves.map((l, i) => (
+                <tr key={i}>
                   <td>{l.date}</td>
                   <td>{l.reason}</td>
                   <td>{l.status}</td>

@@ -13,7 +13,7 @@ function Mail() {
         <h1 className="logo">HRMSPortal</h1>
 
         <button
-          className="btn login-btn"
+          className="madhu"
           onClick={() => navigate("/login")}
         >
           Login
@@ -26,7 +26,7 @@ function Mail() {
         <p className="hero-text">
           Manage employees, attendance, payroll, leave requests, and more.
         </p>
-        <button className="btn get-started-btn">
+        <button className="get-started">
           Get Started
         </button>
       </section>

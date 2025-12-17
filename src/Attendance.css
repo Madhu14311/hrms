@@ -5,6 +5,10 @@
   font-family: "Inter", sans-serif;
 
 }
+.attendance-container .welcome-text{
+  text-align: center;
+  color: #4caf50;
+}
 
 .hi {
   background-color: #999;

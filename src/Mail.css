@@ -1,6 +1,4 @@
-/* =========================
-   MAIN CONTAINER
-   ========================= */
+
 .main-container {
   min-height: 100vh;
   background: silver;
@@ -10,9 +8,7 @@
   align-items: center;
 }
 
-/* =========================
-   HEADER
-   ========================= */
+
 .header {
   width: 100%;
   padding: 20px 0;
@@ -34,9 +30,7 @@
   justify-content: start;
 }
 
-/* =========================
-   BUTTONS
-   ========================= */
+
 .btn {
   padding: 12px 20px;
   border: none;
@@ -45,25 +39,27 @@
   font-size: 16px;
 }
 
-.login-btn {
-  background: #2563eb;
+.main-container .madhu {
+  background: orangered;
   color: white;
   width: 80px;
+  border-radius: 10px;
+  padding: 10px;
 }
 
-.login-btn:hover {
-  background: #1e4fcc;
+.main-container.login-btn:hover {
+  background: orangered;
 }
 
-.get-started-btn {
-  background: #16a34a;
+.main-container .get-started {
+  background: orangered;
   color: white;
   margin-top: 15px;
+  padding: 19px;
+  border-radius: 10px;
 }
 
-/* =========================
-   HERO SECTION
-   ========================= */
+
 .hero {
   text-align: center;
   margin-top: 60px;
@@ -82,9 +78,7 @@
   margin-top: 15px;
 }
 
-/* =========================
-   CARDS
-   ========================= */
+
 .card-container {
   width: 100%;
   max-width: 1200px;
@@ -122,9 +116,7 @@
   margin-top: 10px;
 }
 
-/* =========================
-   MOBILE VIEW FIX
-   ========================= */
+
 @media (max-width: 768px) {
 
   .main-container {

@@ -1,67 +1,85 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [leaveRecords, setLeaveRecords] = useState([]);
 
-  // Fetch data and poll localStorage every second
   useEffect(() => {
-    const fetchData = () => {
-      const savedAttendance = localStorage.getItem("attendance_records");
-      const savedLeaves = localStorage.getItem("leave_records");
-
-      if (savedAttendance) setAttendanceRecords(JSON.parse(savedAttendance));
-      if (savedLeaves) setLeaveRecords(JSON.parse(savedLeaves));
-    };
-
-    fetchData();
-    const interval = setInterval(fetchData, 1000);
-
-    return () => clearInterval(interval);
+    loadAllData();
   }, []);
 
-  // Approve leave
-  const handleApproveLeave = (index) => {
-    const updatedLeaves = [...leaveRecords];
-    updatedLeaves[index].status = "Approved";
-    setLeaveRecords(updatedLeaves);
-    localStorage.setItem("leave_records", JSON.stringify(updatedLeaves));
+  const loadAllData = () => {
+    // ✅ ATTENDANCE (from shared storage)
+    const allAttendance =
+      JSON.parse(localStorage.getItem("all_attendance")) || {};
+
+    let attendanceList = [];
+
+    Object.entries(allAttendance).forEach(
+      ([name, records]) => {
+        records.forEach((r) => {
+          attendanceList.push({
+            name,
+            date: r.date,
+            checkIn: r.checkIn,
+            checkOut: r.checkOut,
+            hours: r.hours,
+          });
+        });
+      }
+    );
+
+    setAttendanceRecords(attendanceList);
+
+    // ✅ LEAVES (global)
+    const allLeaves =
+      JSON.parse(localStorage.getItem("leave_records")) || [];
+
+    setLeaveRecords(allLeaves);
+  };
+
+  const approveLeave = (index) => {
+    const updated = [...leaveRecords];
+    updated[index].status = "Approved";
+    setLeaveRecords(updated);
+
+    localStorage.setItem(
+      "leave_records",
+      JSON.stringify(updated)
+    );
   };
 
   return (
     <div className="admin-container">
       <h1>Admin Dashboard</h1>
 
-      {/* Attendance Table */}
+      {/* ATTENDANCE */}
       <div className="card">
-        <h2>Attendance Records</h2>
+        <h2>All Attendance Records</h2>
         <table className="table">
           <thead>
             <tr>
-              
-              <th>Date</th>
               <th>Name</th>
+              <th>Date</th>
               <th>Check In</th>
               <th>Check Out</th>
-              <th>Hours Worked</th>
+              <th>Hours</th>
             </tr>
           </thead>
           <tbody>
             {attendanceRecords.length === 0 ? (
               <tr>
-                <td colSpan="5">No records yet.</td>
+                <td colSpan="5">No attendance found</td>
               </tr>
             ) : (
-              attendanceRecords.map((r, index) => (
-                <tr key={index}>
-                  <td>{r.date}</td>
+              attendanceRecords.map((r, i) => (
+                <tr key={i}>
                   <td>{r.name}</td>
+                  <td>{r.date}</td>
                   <td>{r.checkIn}</td>
                   <td>{r.checkOut}</td>
-                  <td>{r.hours} hrs</td>
+                  <td>{r.hours}</td>
                 </tr>
               ))
             )}
@@ -69,13 +87,13 @@ export default function AdminDashboard() {
         </table>
       </div>
 
-      {/* Leave Table */}
+      {/* LEAVES */}
       <div className="card">
-        <h2>Leave Records</h2>
+        <h2>Leave Applications</h2>
         <table className="table">
           <thead>
             <tr>
-              <th>Name</th> {/* ✅ added */}
+              <th>Name</th>
               <th>Date</th>
               <th>Reason</th>
               <th>Status</th>
@@ -85,18 +103,18 @@ export default function AdminDashboard() {
           <tbody>
             {leaveRecords.length === 0 ? (
               <tr>
-                <td colSpan="5">No leave applications yet.</td>
+                <td colSpan="5">No leave requests</td>
               </tr>
             ) : (
-              leaveRecords.map((l, index) => (
-                <tr key={index}>
-                  <td>{l.name}</td> {/* ✅ added */}
+              leaveRecords.map((l, i) => (
+                <tr key={i}>
+                  <td>{l.name}</td>
                   <td>{l.date}</td>
                   <td>{l.reason}</td>
                   <td>{l.status}</td>
                   <td>
                     {l.status === "Pending" && (
-                      <button onClick={() => handleApproveLeave(index)}>
+                      <button onClick={() => approveLeave(i)}>
                         Approve
                       </button>
                     )}

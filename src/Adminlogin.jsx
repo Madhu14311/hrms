@@ -102,7 +102,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Adminlogin.css";
-import logo1 from "./assets/logo3.jpg"
+import logo1 from "./assets/logo3.jpg";
+import image from "./assets/image.png"
 
 export default function Login() {
   const navigate = useNavigate();
@@ -166,10 +167,17 @@ export default function Login() {
   };
 
   return (
+  
     <div className="login-container">
+        <div className="brand-title">
+          <img src={image} alt=""/>
+        </div>
+
+    
       <div className="image-panel">
         <img src={logo1} alt="Login Illustration" />
       </div>
+  
 
       <div className="form-panel">
         <h2 className="login-title">HRMS Login</h2>
