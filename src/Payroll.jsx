@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Attendance.css";
 
-const HOURLY_RATE = 100;
+const HOURLY_RATE = 16;
 
 export default function AdminPayroll() {
   const [attendanceData, setAttendanceData] = useState({});
@@ -72,7 +72,7 @@ useEffect(() => {
             <div className="card" key={index}>
               <h2>Employee: {employeeName}</h2>
 
-              {/* Attendance */}
+             
               <h3>Attendance</h3>
               <table className="table">
                 <thead>
@@ -101,13 +101,13 @@ useEffect(() => {
                 </tbody>
               </table>
 
-              {/* Salary Summary */}
+             
               <h3>Salary Summary</h3>
               <p><strong>Total Hours:</strong> {totalHours.toFixed(2)}</p>
               <p><strong>Hourly Rate:</strong> ₹{HOURLY_RATE}</p>
               <p><strong>Total Salary:</strong> ₹{totalSalary.toFixed(2)}</p>
 
-              {/* Payroll Editable Table */}
+            
               <h3>Payroll Details</h3>
               <table className="table">
                 <thead>

@@ -202,7 +202,7 @@ export default function Login() {
             required
           />
 
-          {/* 🔹 PASSWORD WITH EYE ICON */}
+        
           <div className="password-wrapper">
             <input
               type={showPassword ? "text" : "password"}

@@ -2,15 +2,10 @@ import React, { useState, useEffect } from "react";
 import "./Attendance.css";
 
 export default function Attendance() {
-  const loggedEmployee = JSON.parse(
-    localStorage.getItem("loggedEmployee")
-  );
-
+  const loggedEmployee = JSON.parse(localStorage.getItem("loggedEmployee"));
   const employeeName = loggedEmployee?.name;
 
   const [records, setRecords] = useState([]);
-  const [startTime, setStartTime] = useState(null);
-
   const [leaves, setLeaves] = useState([]);
   const [leaveDate, setLeaveDate] = useState("");
   const [leaveReason, setLeaveReason] = useState("");
@@ -24,13 +19,7 @@ export default function Attendance() {
     const allAttendance =
       JSON.parse(localStorage.getItem("all_attendance")) || {};
 
-    if (allAttendance[employeeName]) {
-      setRecords(allAttendance[employeeName]);
-
-      if (allAttendance[employeeName][0]?.checkOut === "--") {
-        setStartTime(new Date());
-      }
-    }
+    setRecords(allAttendance[employeeName] || []);
 
     const savedLeaves =
       JSON.parse(localStorage.getItem("leave_records")) || [];
@@ -40,53 +29,81 @@ export default function Attendance() {
   /* =======================
      CHECK IN
      ======================= */
-// CHECK IN
-const handleCheckIn = () => {
-  const now = new Date();
+  const handleCheckIn = () => {
+    const now = new Date();
 
-  const allAttendance =
-    JSON.parse(localStorage.getItem("all_attendance")) || {};
+    const allAttendance =
+      JSON.parse(localStorage.getItem("all_attendance")) || {};
 
-  if (!allAttendance[employeeName]) {
-    allAttendance[employeeName] = [];
-  }
+    if (!allAttendance[employeeName]) {
+      allAttendance[employeeName] = [];
+    }
 
-  allAttendance[employeeName].unshift({
-    date: now.toLocaleDateString(),
-    name: employeeName,
-    checkIn: now.toLocaleTimeString(),
-    checkInTime: now.getTime(), // store timestamp for calculation
-    checkOut: "--",
-    hours: "--",
-  });
+    // Prevent double check-in
+    if (allAttendance[employeeName][0]?.checkOut === "--") return;
 
-  localStorage.setItem("all_attendance", JSON.stringify(allAttendance));
-  setRecords(allAttendance[employeeName]);
-};
+    allAttendance[employeeName].unshift({
+      date: now.toLocaleDateString("en-IN"),
+      name: employeeName,
+      checkIn: now.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+      checkInTime: now.getTime(), // timestamp for calculation
+      checkOut: "--",
+      hours: "--", // HH:MM will be stored on checkout
+    });
 
-// CHECK OUT
-const handleCheckOut = () => {
-  const now = new Date();
-
-  const allAttendance =
-    JSON.parse(localStorage.getItem("all_attendance")) || {};
-
-  const todayRecord = allAttendance[employeeName][0];
-
-  if (!todayRecord || todayRecord.checkOut !== "--") return;
-
-  const hoursWorked = ((now.getTime() - todayRecord.checkInTime) / (1000*60*60)).toFixed(2);
-
-  allAttendance[employeeName][0] = {
-    ...todayRecord,
-    checkOut: now.toLocaleTimeString(),
-    hours: hoursWorked,
+    localStorage.setItem("all_attendance", JSON.stringify(allAttendance));
+    setRecords(allAttendance[employeeName]);
   };
 
-  localStorage.setItem("all_attendance", JSON.stringify(allAttendance));
-  setRecords(allAttendance[employeeName]);
-};
+  /* =======================
+     CHECK OUT
+     ======================= */
+  const handleCheckOut = () => {
+    const now = new Date();
 
+    const allAttendance =
+      JSON.parse(localStorage.getItem("all_attendance")) || {};
+
+    const todayRecord = allAttendance[employeeName]?.[0];
+
+    if (!todayRecord || todayRecord.checkOut !== "--") return;
+
+    if (!todayRecord.checkInTime) {
+      alert("Check-in time missing. Please check in again.");
+      return;
+    }
+
+    // Calculate HH:MM
+    const diffMs = now.getTime() - todayRecord.checkInTime;
+    const totalMinutes = Math.floor(diffMs / (1000 * 60));
+
+    const hrs = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+
+    const workedTime = `${String(hrs).padStart(2, "0")}:${String(mins).padStart(
+      2,
+      "0"
+    )}`;
+
+    allAttendance[employeeName][0] = {
+      ...todayRecord,
+      checkOut: now.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      }),
+      hours: workedTime, // ✅ STORED AS HH:MM
+    };
+
+    localStorage.setItem("all_attendance", JSON.stringify(allAttendance));
+    setRecords(allAttendance[employeeName]);
+  };
 
   /* =======================
      APPLY LEAVE
@@ -105,20 +122,14 @@ const handleCheckOut = () => {
     };
 
     const updatedLeaves = [newLeave, ...leaves];
-
     setLeaves(updatedLeaves);
-    localStorage.setItem(
-      "leave_records",
-      JSON.stringify(updatedLeaves)
-    );
+    localStorage.setItem("leave_records", JSON.stringify(updatedLeaves));
 
     setLeaveDate("");
     setLeaveReason("");
   };
 
-  const myLeaves = leaves.filter(
-    (l) => l.name === employeeName
-  );
+  const myLeaves = leaves.filter((l) => l.name === employeeName);
 
   const isCheckedIn =
     records.length > 0 && records[0].checkOut === "--";
@@ -130,7 +141,6 @@ const handleCheckOut = () => {
     <div className="attendance-container">
       <h1>Welcome, {employeeName} 👋</h1>
 
-      {/* Attendance */}
       <div className="card">
         <button
           className="btn btn-checkin"
@@ -150,7 +160,6 @@ const handleCheckOut = () => {
         </button>
       </div>
 
-      {/* Records */}
       <div className="card">
         <h2>Attendance Records</h2>
         <table className="table">
@@ -159,7 +168,7 @@ const handleCheckOut = () => {
               <th>Date</th>
               <th>Check In</th>
               <th>Check Out</th>
-              <th>Hours</th>
+              <th>Worked Time (HH:MM)</th>
             </tr>
           </thead>
           <tbody>
@@ -181,7 +190,6 @@ const handleCheckOut = () => {
         </table>
       </div>
 
-      {/* Apply Leave */}
       <div className="card">
         <h2>Apply Leave</h2>
         <input
@@ -200,7 +208,6 @@ const handleCheckOut = () => {
         </button>
       </div>
 
-      {/* Leave Records */}
       <div className="card">
         <h2>My Leave Records</h2>
         <table className="table">
