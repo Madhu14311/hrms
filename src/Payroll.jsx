@@ -18,7 +18,7 @@ useEffect(() => {
       ]
     };
   setAttendanceData(allAttendance);
-}, []);
+
 
     setAttendanceData(allAttendance);
 
