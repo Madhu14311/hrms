@@ -40,64 +40,53 @@ export default function Attendance() {
   /* =======================
      CHECK IN
      ======================= */
-  const handleCheckIn = () => {
-    if (startTime) return;
+// CHECK IN
+const handleCheckIn = () => {
+  const now = new Date();
 
-    const now = new Date();
-    setStartTime(now);
+  const allAttendance =
+    JSON.parse(localStorage.getItem("all_attendance")) || {};
 
-    const allAttendance =
-      JSON.parse(localStorage.getItem("all_attendance")) || {};
+  if (!allAttendance[employeeName]) {
+    allAttendance[employeeName] = [];
+  }
 
-    if (!allAttendance[employeeName]) {
-      allAttendance[employeeName] = [];
-    }
+  allAttendance[employeeName].unshift({
+    date: now.toLocaleDateString(),
+    name: employeeName,
+    checkIn: now.toLocaleTimeString(),
+    checkInTime: now.getTime(), // store timestamp for calculation
+    checkOut: "--",
+    hours: "--",
+  });
 
-    allAttendance[employeeName].unshift({
-      date: now.toLocaleDateString(),
-      name: employeeName,
-      checkIn: now.toLocaleTimeString(),
-      checkOut: "--",
-      hours: "--",
-    });
+  localStorage.setItem("all_attendance", JSON.stringify(allAttendance));
+  setRecords(allAttendance[employeeName]);
+};
 
-    localStorage.setItem(
-      "all_attendance",
-      JSON.stringify(allAttendance)
-    );
+// CHECK OUT
+const handleCheckOut = () => {
+  const now = new Date();
 
-    setRecords(allAttendance[employeeName]);
+  const allAttendance =
+    JSON.parse(localStorage.getItem("all_attendance")) || {};
+
+  const todayRecord = allAttendance[employeeName][0];
+
+  if (!todayRecord || todayRecord.checkOut !== "--") return;
+
+  const hoursWorked = ((now.getTime() - todayRecord.checkInTime) / (1000*60*60)).toFixed(2);
+
+  allAttendance[employeeName][0] = {
+    ...todayRecord,
+    checkOut: now.toLocaleTimeString(),
+    hours: hoursWorked,
   };
 
-  /* =======================
-     CHECK OUT
-     ======================= */
-  const handleCheckOut = () => {
-    if (!startTime) return;
+  localStorage.setItem("all_attendance", JSON.stringify(allAttendance));
+  setRecords(allAttendance[employeeName]);
+};
 
-    const endTime = new Date();
-    const hours = (
-      (endTime - startTime) /
-      (1000 * 60 * 60)
-    ).toFixed(2);
-
-    const allAttendance =
-      JSON.parse(localStorage.getItem("all_attendance")) || {};
-
-    allAttendance[employeeName][0] = {
-      ...allAttendance[employeeName][0],
-      checkOut: endTime.toLocaleTimeString(),
-      hours,
-    };
-
-    localStorage.setItem(
-      "all_attendance",
-      JSON.stringify(allAttendance)
-    );
-
-    setRecords(allAttendance[employeeName]);
-    setStartTime(null);
-  };
 
   /* =======================
      APPLY LEAVE

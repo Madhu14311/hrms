@@ -6,6 +6,7 @@ import Attendance from "./Attendance";
 import HRRegister from "./Hr";
 import AdminDashboard from "./Admin";
 import AdminLogin from "./Adminlogin";
+import Payroll from "./Payroll";
 export default function App() {
   return (
   
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/HrRegister" element={<HRRegister />} />
          <Route path="/admin" element={<AdminDashboard />} />
          <Route path="/" element={<AdminLogin/>}/>
+         <Route path="payroll" element={<Payroll/>}/>
 
       </Routes>
   
