@@ -8,12 +8,18 @@ export default function AdminPayroll() {
   const [payrollRows, setPayrollRows] = useState({});
   const [editingRow, setEditingRow] = useState(null);
 
-  /* =======================
-     LOAD DATA
-     ======================= */
-  useEffect(() => {
-    const allAttendance =
-      JSON.parse(localStorage.getItem("all_attendance")) || {};
+
+useEffect(() => {
+  const allAttendance =
+    JSON.parse(localStorage.getItem("all_attendance")) || {
+      "Madhu Seetalam": [
+        { date: "2025-12-18", checkIn: "09:00", checkOut: "18:00", hours: "9" },
+        { date: "2025-12-19", checkIn: "09:30", checkOut: "18:30", hours: "9" }
+      ]
+    };
+  setAttendanceData(allAttendance);
+}, []);
+
     setAttendanceData(allAttendance);
 
     const payrollInit = {};
@@ -39,18 +45,15 @@ export default function AdminPayroll() {
     setPayrollRows(payrollInit);
   }, []);
 
-  /* =======================
-     HELPERS
-     ======================= */
+
   const getCompletedRecords = (records = []) =>
     records.filter((r) => r.hours !== "--");
 
   const calculateTotalHours = (records) =>
     records.reduce((sum, r) => sum + parseFloat(r.hours), 0);
 
-  /* =======================
-     UI
-     ======================= */
+ 
+ 
   return (
     <div className="attendance-container">
       <h1>All Employees Payroll</h1>
